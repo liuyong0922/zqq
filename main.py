@@ -5,7 +5,7 @@ from wechatpy.client.api import WeChatMessage, WeChatTemplate
 import requests
 import os
 import random
-import urllib, sys
+import urllib, urllib.request, sys
 import ssl
 
 
@@ -33,7 +33,7 @@ def get_weather():
   bodys['lon'] = '''117.23344'''
   bodys['token'] = '''443847fa1ffd4e69d929807d42c2db1b'''
   post_data = urllib.urlencode(bodys)
-  request = urllib2.Request(url, post_data)
+  request = urllib.request.Request(url, post_data)
   request.add_header('Authorization', 'APPCODE ' + appcode)
   request.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
   ctx = ssl.create_default_context()
