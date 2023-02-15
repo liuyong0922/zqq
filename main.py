@@ -42,7 +42,7 @@ def get_weather():
   response = urllib.request.urlopen(request, context=ctx)
   content = response.read() 
   if (content):
-    print(content.text)
+    print(content.decode('utf-8'))
   weather = content['data']['forecast'][0]
   return weather['conditionDay'], math.floor(weather['tempNight'])
 
