@@ -42,7 +42,7 @@ def get_weather():
   response = urllib.request.urlopen(request, context=ctx)
   content = response.read()
   if (content):
-    print(content)
+    print(content['data'])
 #   weather = content['data']['forecast'][0]
   return 11, 1
 
