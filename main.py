@@ -32,7 +32,7 @@ def get_weather():
   bodys['lat'] = '''31.82658'''
   bodys['lon'] = '''117.23344'''
   bodys['token'] = '''443847fa1ffd4e69d929807d42c2db1b'''
-  post_data = urllib.urlencode(bodys)
+  post_data = urllib.parse.urlencode(bodys)
   request = urllib.request.Request(url, post_data)
   request.add_header('Authorization', 'APPCODE ' + appcode)
   request.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
