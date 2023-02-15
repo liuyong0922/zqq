@@ -5,9 +5,7 @@ from wechatpy.client.api import WeChatMessage, WeChatTemplate
 import requests
 import os
 import random
-import urllib
-import urllib2
-import sys
+import urllib, sys
 import ssl
 
 
@@ -41,7 +39,7 @@ def get_weather():
   ctx = ssl.create_default_context()
   ctx.check_hostname = False
   ctx.verify_mode = ssl.CERT_NONE
-  response = urllib2.urlopen(request, context=ctx)
+  response = urllib.request.urlopen(request, context=ctx)
   content = response.read()
   weather = content['data']['forecast'][0]
   return weather['conditionDay'], math.floor(weather['tempNight'])
