@@ -5,7 +5,7 @@ from wechatpy.client.api import WeChatMessage, WeChatTemplate
 import requests
 import os
 import random
-import urllib, urllib2, sys
+import urllib,sys
 import ssl
 
 
