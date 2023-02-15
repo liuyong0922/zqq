@@ -41,10 +41,8 @@ def get_weather():
   ctx.check_hostname = False
   ctx.verify_mode = ssl.CERT_NONE
   response = urllib.request.urlopen(request, context=ctx)
-  content = response.read().decode('utf-8')
-  if (content):
-    print(json.loads(content))
-  weather = json.loads(content).['data']['forecast'][0]
+  content = json.loads(response.read().decode('utf-8'))
+  weather = content.['data']['forecast'][0]
   return weather['conditionNight'], math.floor(weather['tempNight'])
 
 def get_count():
