@@ -44,8 +44,8 @@ def get_weather():
   content = response.read().decode('utf-8')
   if (content):
     print(json.loads(content))
-  weather = content['data']['forecast'][0]
-  return weather['tempNight'], math.floor(weather['tempNight'])
+  weather = json.loads(content).['data']['forecast'][0]
+  return weather['conditionNight'], math.floor(weather['tempNight'])
 
 def get_count():
   delta = today - datetime.strptime(start_date, "%Y-%m-%d")
