@@ -41,8 +41,10 @@ def get_weather():
   ctx.verify_mode = ssl.CERT_NONE
   response = urllib.request.urlopen(request, context=ctx)
   content = response.read()
-  weather = content['data']['forecast'][0]
-  return weather['conditionDay'], math.floor(weather['tempNight'])
+  if (content):
+    print(content)
+#   weather = content['data']['forecast'][0]
+  return 11, 1
 
 def get_count():
   delta = today - datetime.strptime(start_date, "%Y-%m-%d")
