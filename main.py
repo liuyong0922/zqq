@@ -43,8 +43,9 @@ def get_weather():
   response = urllib.request.urlopen(request, context=ctx)
   content = json.loads(response.read().decode('utf-8'))
   weather = content['data']['forecast'][0]
+  temp=weather['tempNight']+'-'+weather['tempDay']
   print(weather)
-  return weather['conditionDay'], weather['tempNight']-weather['tempDay']
+  return weather['conditionDay'], temp
 
 def get_count():
   delta = today - datetime.strptime(start_date, "%Y-%m-%d")
