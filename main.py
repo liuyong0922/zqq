@@ -40,9 +40,9 @@ def get_weather():
   ctx.check_hostname = False
   ctx.verify_mode = ssl.CERT_NONE
   response = urllib.request.urlopen(request, context=ctx)
-  content = response.read().decode('utf-8').json()
+  content = response.read().decode('utf-8')
   if (content):
-    print(content)
+    print(json.loads(content))
   weather = content['data']['forecast'][0]
   return weather['tempNight'], math.floor(weather['tempNight'])
 
