@@ -1,76 +1,108 @@
-from datetime import date, datetime
-import math
-from wechatpy import WeChatClient
-from wechatpy.client.api import WeChatMessage, WeChatTemplate
-import requests
-import os
 import random
-import urllib, urllib.request, sys
-import ssl
-import json
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
+from forecast import auto_arima, forecast
 
+# Set random seed for reproducibility
+random.seed(123)
 
-host = 'https://apifreelat.market.alicloudapi.com'
-path = '/whapi/json/aliweather/briefforecast3days'
-method = 'POST'
-appcode = '89b18879b9e2487f8f74f726abf5de70'
-querys = ''
-bodys = {}
-url = host + path
-today = datetime.now()
-start_date = os.environ['START_DATE']
-city = os.environ['CITY']
-birthday = os.environ['BIRTHDAY']
+# Simulated Time Series Data
+time = np.arange('2022-01-01', '2023-01-01', dtype='datetime64[W]')
+value = np.sin(2 * np.pi * np.arange(1, 53) / 12) + np.random.normal(0, 0.5, 52)
+ts_data = pd.Series(value, index=time)
 
-app_id = os.environ["APP_ID"]
-app_secret = os.environ["APP_SECRET"]
+# Data Preprocessing: Smoothing
+# You can add smoothing techniques here
 
-user_id = os.environ["USER_ID"]
-template_id = os.environ["TEMPLATE_ID"]
+# Plot Simulated Time Series Data
+plt.plot(ts_data)
+plt.title("Simulated Time Series Data")
+plt.xlabel("Year")
+plt.ylabel("Value")
+plt.show()
 
+# Augmented Dickey-Fuller Test
+adf_test = adfuller(ts_data)
+print(adf_test)
 
-def get_weather():
-  bodys['lat'] = '''31.82658'''
-  bodys['lon'] = '''117.23344'''
-  bodys['token'] = '''443847fa1ffd4e69d929807d42c2db1b'''
-  post_data = urllib.parse.urlencode(bodys).encode('utf-8')
-  request = urllib.request.Request(url, post_data)
-  request.add_header('Authorization', 'APPCODE ' + appcode)
-  request.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-  ctx = ssl.create_default_context()
-  ctx.check_hostname = False
-  ctx.verify_mode = ssl.CERT_NONE
-  response = urllib.request.urlopen(request, context=ctx)
-  content = json.loads(response.read().decode('utf-8'))
-  weather = content['data']['forecast'][0]
-  temp=weather['tempNight']+'-'+weather['tempDay']
-  print(weather)
-  return weather['conditionDay'], temp
+# Auto ARIMA Model
+# You might need to fine-tune the parameters for better accuracy
+arima_model = auto_arima(ts_data)
+print(arima_model)
 
-def get_count():
-  delta = today - datetime.strptime(start_date, "%Y-%m-%d")
-  return delta.days
+# Forecasting
+forecast_values = forecast(arima_model, h=12)
+print(forecast_values)
 
-def get_birthday():
-  next = datetime.strptime(str(date.today().year) + "-" + birthday, "%Y-%m-%d")
-  if next < datetime.now():
-    next = next.replace(year=next.year + 1)
-  return (next - today).days
+# Plot Forecasted Time Series Data
+plt.plot(forecast_values)
+plt.title("Forecasted Time Series Data")
+plt.xlabel("Year")
+plt.ylabel("Value")
+plt.show()
 
-def get_words():
-  words = requests.get("https://api.shadiao.pro/chp")
-  if words.status_code != 200:
-    return get_words()
-  return words.json()['data']['text']
+def calculate_safety_stock(avg_demand, demand_std, avg_lead_time, lead_time_std, service_level):
+    """
+    Calculate safety stock using the given parameters.
 
-def get_random_color():
-  return "#%06x" % random.randint(0, 0xFFFFFF)
+    Args:
+    - avg_demand: Average weekly demand
+    - demand_std: Standard deviation of weekly demand
+    - avg_lead_time: Average lead time (days)
+    - lead_time_std: Standard deviation of lead time (days)
+    - service_level: Service level coefficient (safety factor)
 
+    Returns:
+    - safety_stock: Calculated safety stock
+    """
+    term1 = demand_std ** 2 * avg_lead_time
+    term2 = lead_time_std ** 2 * avg_demand ** 2
+    safety_stock = service_level * np.sqrt(term1 + term2)
+    return safety_stock
 
-client = WeChatClient(app_id, app_secret)
+def calculate_resilience_index(safety_stock, avg_lead_time):
+    """
+    Calculate resilience index using safety stock and average lead time.
 
-wm = WeChatMessage(client)
-wea, temperature = get_weather()
-data = {"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
-res = wm.send_template(user_id, template_id, data)
-print(res)
+    Args:
+    - safety_stock: Safety stock level
+    - avg_lead_time: Average lead time (days)
+
+    Returns:
+    - resilience_index: Calculated resilience index
+    """
+    resilience_index = safety_stock / avg_lead_time
+    return resilience_index
+
+# Data for Supplier A
+avg_demand_A = 1000  # Average weekly demand
+demand_std_A = 100  # Standard deviation of weekly demand
+avg_lead_time_A = 14  # Average lead time (days)
+lead_time_std_A = 2  # Standard deviation of lead time (days)
+service_level = 1.96  # Service level coefficient (safety factor)
+
+# Calculate safety stock for Supplier A
+safety_stock_A = calculate_safety_stock(avg_demand_A, demand_std_A, avg_lead_time_A, lead_time_std_A, service_level)
+
+# Calculate resilience index for Supplier A
+avg_lead_time_supplier_A = 10  # Average lead time (days) for Supplier A
+resilience_index_supplier_A = calculate_resilience_index(safety_stock_A, avg_lead_time_supplier_A)
+
+print("Supplier A - Safety Stock:", safety_stock_A)
+print("Supplier A - Resilience Index:", resilience_index_supplier_A)
+
+# Data for plot
+categories = ['Safety Stock', 'Resilience Index']
+values = [safety_stock_A, resilience_index_supplier_A]
+
+# Create bar plot
+plt.bar(categories, values, color=['blue', 'green'])
+
+# Add title and labels
+plt.title('Supplier A Inventory Analysis')
+plt.xlabel('Metrics')
+plt.ylabel('Values')
+
+# Show plot
+plt.show()
